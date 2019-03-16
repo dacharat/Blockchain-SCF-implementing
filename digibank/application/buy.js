@@ -23,6 +23,18 @@ const CommercialPaper = require('../contract/lib/paper.js');
 // A wallet stores a collection of identities for use
 const wallet = new FileSystemWallet('../identity/user/balaji/wallet');
 
+const printPaper = paper => {
+    console.log('========================================================');
+    console.log('Issue by: ', paper.issuer);
+    console.log('Invoice paper: ', paper.paperNumber);
+    console.log('Created by: ', paper.invoiceOwner);
+    console.log('Created date: ', paper.issueDateTime);
+    console.log('Maturity date: ', paper.maturityDateTime);
+    console.log('Value: ', paper.faceValue);
+    console.log('Owner: ', paper.owner);
+    console.log('========================================================');
+};
+
 // Main program function
 async function main() {
 
@@ -65,19 +77,20 @@ async function main() {
         // buy commercial paper
         console.log('Submit commercial paper buy transaction.');
 
-        const result = await contract.evaluateTransaction('allPaper');
+        // const result = await contract.evaluateTransaction('allPaper');
         // let result = CommercialPaper.fromBuffer(resultBuffer);
-        console.log(result);
+        // console.log(result);
         
-        // const buyResponse = await contract.submitTransaction('buy', 'MagnetoCorp', '00001', 'DigiBank', 'DigiBank', '4900000', '2020-05-31');
+        const buyResponse = await contract.submitTransaction( 'buy','MagnetoCorp','00001','MagnetoCorp','DigiBank','4900000','2020-05-31');
 
-        // // process response
-        // console.log('Process buy transaction response.');
+        // process response
+        console.log('Process buy transaction response.');
 
-        // let paper = CommercialPaper.fromBuffer(buyResponse);
+        let paper = CommercialPaper.fromBuffer(buyResponse);
 
+        printPaper(paper);
         // console.log(`${paper.issuer} commercial paper : ${paper.paperNumber} successfully purchased by ${paper.owner}`);
-        // console.log('Transaction complete.');
+        console.log('Transaction complete.');
 
     } catch (error) {
 

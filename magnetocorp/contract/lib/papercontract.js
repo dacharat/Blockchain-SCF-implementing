@@ -192,9 +192,79 @@ class CommercialPaperContract extends Contract {
      * @param {String} currentOwner current owner of paper
      * @param {Integer} paperNumber paper number for this issuer
      */
-    async sell(ctx, issuer, currentOwner, paperNumber) {
-        let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
+    // async sell(ctx, issuer, currentOwner, paperNumber) {
+    //     let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
 
+    //     let paper = await ctx.paperList.getPaper(paperKey);
+
+    //     // Validate current owner
+    //     if (paper.getOwner() !== currentOwner) {
+    //         throw new Error(
+    //             "Paper " +
+    //                 issuer +
+    //                 paperNumber +
+    //                 " is not owned by " +
+    //                 currentOwner
+    //         );
+    //     }
+
+    //     await ctx.paperList.updatePaper(paper);
+    //     return paper.toBuffer();
+    // }
+
+    /**
+     * Invoice commercial paper
+     *
+     * @param {Context} ctx the transaction context
+     * @param {String} issuer commercial paper issuer
+     * @param {Integer} paperNumber paper number for this invoice
+     * @param {String} issueDateTime paper issue date
+     * @param {String} maturityDateTime paper maturity date
+     * @param {Integer} faceValue face value of paper
+     * @param {String} invoiceOwner the supplier who create invoice
+     */
+    async invoice(
+        ctx,
+        issuer,
+        paperNumber,
+        issueDateTime,
+        maturityDateTime,
+        faceValue,
+        invoiceOwner
+    ) {
+        // create an instance of the paper
+        let paper = CommercialPaper.createInstance(
+            issuer,
+            paperNumber,
+            issueDateTime,
+            maturityDateTime,
+            faceValue,
+            invoiceOwner
+        );
+
+        // Smart contract, rather than paper, moves paper into INVOICED state
+        paper.setInvoiced();
+
+        // Newly invoiced paper is owned by the invoiceOwner
+        paper.setOwner(invoiceOwner);
+
+        // Add the paper to the list of all similar commercial papers in the ledger world state
+        await ctx.paperList.addPaper(paper);
+
+        // Must return a serialized paper to caller of smart contract
+        return paper.toBuffer();
+    }
+
+    /**
+     *
+     * @param {Context} ctx the transaction context
+     * @param {String} issuer commercial paper issuer
+     * @param {Inteder} paperNumber paper number for this invoice
+     * @param {String} currentOwner current owner of this invoice
+     * @param {String} newOwner new owner of paper
+     */
+    async approve(ctx, issuer, paperNumber, currentOwner, newOwner) {
+        let paperKey = CommercialPaper.makeKey([issuer, paperNumber]);
         let paper = await ctx.paperList.getPaper(paperKey);
 
         // Validate current owner
@@ -208,6 +278,24 @@ class CommercialPaperContract extends Contract {
             );
         }
 
+        if (paper.isInvoiced()) {
+            paper.setIssued();
+        }
+
+        // Check paper is not already TREADING
+        if (paper.isIssued()) {
+            paper.setOwner(newOwner);
+        } else {
+            throw new Error(
+                "Paper " +
+                    issuer +
+                    paperNumber +
+                    " is not issue. Current state = " +
+                    paper.getCurrentState()
+            );
+        }
+
+        // Update the paper
         await ctx.paperList.updatePaper(paper);
         return paper.toBuffer();
     }
@@ -218,7 +306,7 @@ class CommercialPaperContract extends Contract {
      * @param {Context} ctx the transaction context
      */
     async allPaper(ctx) {
-        return await ctx.paperList;
+        return await ctx.paperList.toBuffer();
     }
 }
 

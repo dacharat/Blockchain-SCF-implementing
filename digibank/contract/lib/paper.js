@@ -9,6 +9,7 @@ const State = require('./../ledger-api/state.js');
 
 // Enumerate commercial paper state values
 const cpState = {
+    INVOICED: 0,
     ISSUED: 1,
     TRADING: 2,
     REDEEMED: 3
@@ -19,7 +20,6 @@ const cpState = {
  * Class will be used by application and smart contract to define a paper
  */
 class CommercialPaper extends State {
-
     constructor(obj) {
         super(CommercialPaper.getClass(), [obj.issuer, obj.paperNumber]);
         Object.assign(this, obj);
@@ -27,7 +27,7 @@ class CommercialPaper extends State {
 
     /**
      * Basic getters and setters
-    */
+     */
     getIssuer() {
         return this.issuer;
     }
@@ -44,6 +44,11 @@ class CommercialPaper extends State {
         this.owner = newOwner;
     }
 
+    // set invoice state
+    setInvoiced() {
+        this.currentState = cpState.INVOICED;
+    }
+
     /**
      * Useful methods to encapsulate commercial paper states
      */
@@ -57,6 +62,11 @@ class CommercialPaper extends State {
 
     setRedeemed() {
         this.currentState = cpState.REDEEMED;
+    }
+
+    // check invoice state
+    isInvoices() {
+        return this.currentState === cpState.INVOICED;
     }
 
     isIssued() {
@@ -90,12 +100,26 @@ class CommercialPaper extends State {
     /**
      * Factory method to create a commercial paper object
      */
-    static createInstance(issuer, paperNumber, issueDateTime, maturityDateTime, faceValue) {
-        return new CommercialPaper({ issuer, paperNumber, issueDateTime, maturityDateTime, faceValue });
+    static createInstance(
+        issuer,
+        paperNumber,
+        issueDateTime,
+        maturityDateTime,
+        faceValue,
+        invoiceOwner = ""
+    ) {
+        return new CommercialPaper({
+            issuer,
+            paperNumber,
+            issueDateTime,
+            maturityDateTime,
+            faceValue,
+            invoiceOwner
+        });
     }
 
     static getClass() {
-        return 'org.papernet.commercialpaper';
+        return "org.papernet.commercialpaper";
     }
 }
 
