@@ -44,6 +44,11 @@ class CommercialPaper extends State {
         this.owner = newOwner;
     }
 
+    // get the company who will redeem paper
+    getRedeemAt() {
+        return this.redeemAt;
+    }
+
     // set invoice state
     setInvoiced() {
         this.currentState = cpState.INVOICED;
@@ -106,7 +111,7 @@ class CommercialPaper extends State {
         issueDateTime,
         maturityDateTime,
         faceValue,
-        invoiceOwner = ""
+        redeemAt = ""
     ) {
         return new CommercialPaper({
             issuer,
@@ -114,7 +119,7 @@ class CommercialPaper extends State {
             issueDateTime,
             maturityDateTime,
             faceValue,
-            invoiceOwner
+            redeemAt
         });
     }
 

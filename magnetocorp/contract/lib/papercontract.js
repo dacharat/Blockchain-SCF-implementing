@@ -172,7 +172,11 @@ class CommercialPaperContract extends Contract {
 
         // Verify that the redeemer owns the commercial paper before redeeming it
         if (paper.getOwner() === redeemingOwner) {
-            paper.setOwner(paper.getIssuer());
+            if(paper.getRedeemAt()) {
+                paper.setOwner(paper.getRedeemAt());
+            } else {
+                paper.setOwner(paper.getIssuer());
+            }
             paper.setRedeemed();
         } else {
             throw new Error(
@@ -221,7 +225,7 @@ class CommercialPaperContract extends Contract {
      * @param {String} issueDateTime paper issue date
      * @param {String} maturityDateTime paper maturity date
      * @param {Integer} faceValue face value of paper
-     * @param {String} invoiceOwner the supplier who create invoice
+     * @param {String} redeemAt the supplier who create invoice
      */
     async invoice(
         ctx,
@@ -230,7 +234,7 @@ class CommercialPaperContract extends Contract {
         issueDateTime,
         maturityDateTime,
         faceValue,
-        invoiceOwner
+        redeemAt
     ) {
         // create an instance of the paper
         let paper = CommercialPaper.createInstance(
@@ -239,14 +243,14 @@ class CommercialPaperContract extends Contract {
             issueDateTime,
             maturityDateTime,
             faceValue,
-            invoiceOwner
+            redeemAt
         );
 
         // Smart contract, rather than paper, moves paper into INVOICED state
         paper.setInvoiced();
 
-        // Newly invoiced paper is owned by the invoiceOwner
-        paper.setOwner(invoiceOwner);
+        // Newly invoiced paper is owned by the issuer
+        paper.setOwner(issuer);
 
         // Add the paper to the list of all similar commercial papers in the ledger world state
         await ctx.paperList.addPaper(paper);

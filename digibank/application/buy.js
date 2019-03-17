@@ -27,9 +27,9 @@ const printPaper = paper => {
     console.log('========================================================');
     console.log('Issue by: ', paper.issuer);
     console.log('Invoice paper: ', paper.paperNumber);
-    console.log('Created by: ', paper.invoiceOwner);
     console.log('Created date: ', paper.issueDateTime);
     console.log('Maturity date: ', paper.maturityDateTime);
+    console.log('Redeem at: ', paper.redeemAt);
     console.log('Value: ', paper.faceValue);
     console.log('Owner: ', paper.owner);
     console.log('========================================================');
@@ -81,7 +81,7 @@ async function main() {
         // let result = CommercialPaper.fromBuffer(resultBuffer);
         // console.log(result);
         
-        const buyResponse = await contract.submitTransaction( 'buy','MagnetoCorp','00001','MagnetoCorp','DigiBank','4900000','2020-05-31');
+        const buyResponse = await contract.submitTransaction( 'buy','TanKong','00001','MagnetoCorp','DigiBank','4900000','2020-05-31');
 
         // process response
         console.log('Process buy transaction response.');
